@@ -1,4 +1,4 @@
-#pragma mark - Depend ESP8266Audio and ESP8266_Spiram libraries
+//#pragma mark - Depend ESP8266Audio and ESP8266_Spiram libraries
 /* 
 cd ~/Arduino/libraries
 git clone https://github.com/earlephilhower/ESP8266Audio
@@ -49,7 +49,7 @@ void setup()
   M5.Lcd.fillScreen(BLACK);
   M5.Lcd.setCursor(0, 0);
 
-  DisplayFileName = "/img" + PlayFileName.substring(4, PlayFileName.length()-3) + "jpg";
+  DisplayFileName = "/jacket" + PlayFileName.substring(4, PlayFileName.length()-3) + "jpg";
   
   M5.Lcd.drawJpgFile(SD, DisplayFileName.c_str(), 0, 0, 320, 240);
 
@@ -61,7 +61,7 @@ void setup()
   file = new AudioFileSourceSD(PlayFileName.c_str());
   id3 = new AudioFileSourceID3(file);
   out = new AudioOutputI2S(0, 1); // Output to builtInDAC
-  out->SetOutputModeMono(true);
+  out->SetOutputModeMono(false);
   mp3 = new AudioGeneratorMP3();
   mp3->begin(id3, out);
 }
@@ -73,6 +73,7 @@ void loop()
       mp3->stop();
       M5.Lcd.println("MP3 done\n");
       file->close();
+      M5.Lcd.println("Please reset player.\n");
     }
   } else {
     delay(1000);
@@ -88,10 +89,14 @@ void scanDataFolder() {
    int i = 0;
    boolean exitMenu = false;
 
-  if(!SPIFFS.begin()){
+  Serial.println("scanDataFolder");
+
+  if(!SPIFFS.begin(true)){
     M5.Lcd.println("SPIFFS Mount Failed");
+    Serial.println("SPIFFS Mount Failed");
   } else {
     M5.Lcd.println("Scan data folder");
+    Serial.println("Scan data folder");
     File root = SD.open("/mp3");
     if(!root){
       M5.Lcd.println("Failed to open directory");
